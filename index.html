@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meu Painel de Estudos — Piano (Versão 15.1.0 Cockpit)</title>
+    <style>
+        :root {
+            /* Design System Escuro de Alta Ergonomia */
+            --bg: #0a0f1d;
+            --card: #151f32;
+            --card2: #1c2a42;
+            --card3: #243552;
+            --card-inner: #0e1626;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --accent2: #22c55e;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+            --purple: #8b5cf6;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.16);
+            --metro-off: #1e293b;
+            --metro-flash: #22c55e;
+            --metro-glow: rgba(34, 197, 94, 0.6);
+
+            /* Cores das Caixas Leitner */
+            --box0: #64748b;
+            --box1: #3b82f6;
+            --box2: #06b6d4;
+            --box3: #10b981;
+            --box4: #f59e0b;
+            --box5: #ec4899;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 100px;
+            line-height: 1.5;
+        }
+
+        /* Barra Superior Fixa de Atalhos Hands-Free / Pedal */
+        .hands-free-bar {
+            background: #111a2e;
+            border-bottom: 1px solid var(--border);
+            padding: 8px 16px;
+            font-size: 0.75rem;
+            text-align: center;
+            color: var(--text-muted);
+            position: sticky;
+            top: 0;
+            z-index: 110;
+            backdrop-filter: blur(8px);
+        }
+
+        .hands-free-bar kbd {
+            background: #1e293b;
+            color: #ffffff;
+            padding: 2px 7px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            font-family: inherit;
+            font-weight: 700;
+            display: inline-block;
+            transition: all 0.15s ease;
+        }
+
+        .hands-free-bar kbd.pressed {
+            background: var(--accent);
+            color: #ffffff;
+            transform: scale(1.15);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        }
+
+        header {
+            padding: 16px 16px 10px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.45rem;
+            color: #ffffff;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        header p {
+            margin-top: 2px;
+            color: var(--text-muted);
+            font-size: 0.82rem;
+        }
+
+        /* Barra de Navegação Sticky (6 Abas Principais) */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            padding: 8px 16px 10px;
+            max-width: 900px;
+            margin: 0 auto 12px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            position: sticky;
+            top: 35px;
+            z-index: 100;
+            background: rgba(10, 15, 29, 0.94);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab-btn {
+            flex: 1 0 auto;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tab-btn:hover {
+            background: var(--card2);
+            color: var(--text);
+            border-color: var(--border-hover);
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        /* Sub-abas da Sala de Estudos (5 Modos Unificados) */
+        .subtabs-container {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 680px) {
+            .subtabs-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .subtab-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 10px 6px;
+            border-radius: 10px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .subtab-btn:hover {
+            background: var(--card2);
+            color: #fff;
+        }
+
+        .subtab-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+        }
+
+        /* LAYOUT ERGONÔMICO SPLIT-VIEW (Canvas 70% + Sidebar 30%) */
+        .split-view-container {
+            display: grid;
+            grid-template-columns: 68% 32%;
+            gap: 14px;
+            align-items: start;
+        }
+
+        @media (max-width: 768px) {
+            .split-view-container {
+                grid-template-columns: 1fr;
+            }
+            .split-right {
+                position: static !important;
+            }
+        }
+
+        .split-left {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .split-right {
+            position: sticky;
+            top: 90px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Metrônomo com Pulso Luminoso */
+        .metro-led {
+            width: 14px;
+            height: 14px;
+            background: var(--metro-off);
+            border-radius: 50%;
+            transition: all 0.05s ease;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .metro-led.flash-beat {
+            background: var(--metro-flash);
+            box-shadow: 0 0 12px var(--metro-glow);
+            transform: scale(1.25);
+        }
+
+        /* Container Principal */
+        .container {
+            padding: 0 16px;
+            max-width: 920px;
+            margin: 0 auto;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards Principais */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            transition: border-color 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card h3 {
+            font-size: 0.92rem;
+            color: var(--accent);
+            font-weight: 700;
+            margin: 12px 0 6px;
+        }
+
+        .card p {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        /* Badges */
+        .badge {
+            background: var(--accent2);
+            color: #04240f;
+            font-weight: 700;
+            font-size: 0.68rem;
+            padding: 3px 9px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .badge.warn { background: var(--warn); color: #3a2600; }
+        .badge.info { background: var(--accent); color: #ffffff; }
+        .badge.danger { background: var(--danger); color: #ffffff; }
+        .badge.purple { background: var(--purple); color: #ffffff; }
+        .badge.locked { background: #475569; color: #cbd5e1; }
+        .badge.mirror { background: #6366f1; color: #ffffff; }
+
+        /* Badges das Caixas Leitner */
+        .box-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            color: #ffffff;
+        }
+
+        .box-0 { background: var(--box0); }
+        .box-1 { background: var(--box1); }
+        .box-2 { background: var(--box2); }
+        .box-3 { background: var(--box3); }
+        .box-4 { background: var(--box4); }
+        .box-5 { background: var(--box5); }
+
+        /* Tags de Mãos */
+        .hand-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .hand-mj { background: #059669; color: #fff; }
+        .hand-md { background: #4338ca; color: #fff; }
+        .hand-me { background: #7c3aed; color: #fff; }
+
+        /* Grade Preditiva de 7 Dias */
+        .predictive-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin: 10px 0 12px;
+        }
+
+        .predictive-card {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px 6px;
+            transition: 0.2s;
+        }
+
+        .predictive-card.today {
+            border-color: var(--accent2);
+            background: rgba(34, 197, 94, 0.12);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.2);
+        }
+
+        /* Metas da Semana */
+        .goals-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 10px 0 10px;
+        }
+
+        .goal-box {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 8px;
+        }
+
+        .goal-box-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3px;
+        }
+
+        /* Briefing Matinal */
+        .briefing-box {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 0.82rem;
+            line-height: 1.45;
+            color: #cbd5e1;
+        }
+
+        .briefing-section {
+            margin-bottom: 10px;
+        }
+
+        .briefing-title {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Checklist Adaptativo */
+        .routine-item {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .routine-item:hover {
+            border-color: var(--accent);
+            background: #141f36;
+        }
+
+        .routine-item input[type="checkbox"] {
+            accent-color: var(--accent);
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .routine-info {
+            flex: 1;
+        }
+
+        .routine-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .routine-desc {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-top: 1px;
+        }
+
+        /* Ergonomia Visual: Paper Effect na Partitura */
+        .score-container {
+            background: #0e1626;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sheet-paper-effect, .score-container img, .trecho-thumbnail, #lightboxImg {
+            filter: sepia(0.12) brightness(0.92) contrast(1.08);
+            background: #fbf9f4;
+            border-radius: 8px;
+        }
+
+        @keyframes skeletonPulse {
+            0% { background-color: #0e1626; }
+            50% { background-color: #1a253d; }
+            100% { background-color: #0e1626; }
+        }
+
+        .skeleton-pulse {
+            animation: skeletonPulse 1.5s infinite ease-in-out;
+        }
+
+        /* Gamificação */
+        .xp-level-bar {
+            height: 8px;
+            background: #0e1626;
+            border-radius: 6px;
+            overflow: hidden;
+            margin: 6px 0 10px;
+            border: 1px solid var(--border);
+        }
+
+        .xp-level-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b, #22c55e);
+            width: 65%;
+            transition: width 0.4s ease;
+        }
+
+        /* Sanfonas dos Passos na Aba Peças */
+        .step-accordion {
+            background: #111a2c;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-top: 8px;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .step-content {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-top: 10px;
+        }
+
+        .step-content.collapsed {
+            display: none;
+        }
+
+        .trecho-thumbnail {
+            max-height: 85px;
+            max-width: 100%;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: zoom-in;
+            display: block;
+            padding: 4px;
+            margin-top: 6px;
+        }
+
+        /* Formulários e Inputs */
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .form-control {
+            width: 100%;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 0.82rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .filter-chip {
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        .filter-chip input {
+            accent-color: var(--accent2);
+        }
+
+        /* Tabela de Histórico */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.78rem;
+            margin-top: 8px;
+        }
+
+        .history-table th, .history-table td {
+            padding: 8px 6px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .history-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .heatmap-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            margin: 8px 0 10px;
+        }
+
+        .heatmap-day {
+            aspect-ratio: 1;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            transition: all 0.15s ease;
+        }
+
+        .heatmap-day:hover {
+            transform: scale(1.08);
+            border-color: var(--accent);
+        }
+
+        .heatmap-day.lvl-1 { background: rgba(34, 197, 94, 0.25); color: #93c5fd; }
+        .heatmap-day.lvl-2 { background: rgba(34, 197, 94, 0.55); color: #fff; }
+        .heatmap-day.lvl-3 { background: var(--accent2); color: #04240f; font-weight: 700; }
+
+        .time-filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .filter-btn {
+            flex: 1;
+            background: var(--card-inner);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 7px 8px;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .btn-group { display: flex; gap: 6px; }
+        
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: #ffffff;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-start { background: var(--accent2); color: #04240f; font-weight: 700; }
+        .btn-stop { background: var(--danger); }
+        .btn-reset { background: #334155; }
+        .btn-primary { background: var(--accent); width: 100%; padding: 12px; font-size: 0.88rem; border-radius: 10px; margin-top: 6px; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text); }
+        .btn-guided-main { background: linear-gradient(90deg, #3b82f6, #22c55e); color: #04240f; font-weight: 800; padding: 14px; font-size: 0.94rem; border-radius: 12px; width: 100%; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3); }
+
+        .btn-audit {
+            flex: 1;
+            padding: 12px 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-audit:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-audit-hit { background: var(--accent2); color: #04240f; }
+        .btn-audit-slip { background: var(--warn); color: #3a2600; }
+        .btn-audit-miss { background: var(--danger); color: #ffffff; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .stat-box {
+            background: var(--card2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 4px;
+            text-align: center;
+        }
+
+        .stat-box .num {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .stat-box .lbl {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* Toast Notifications */
+        #toastContainer {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: #1e293b;
+            color: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px 18px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: auto;
+            animation: toastSlideUp 0.3s ease-out;
+        }
+
+        .toast.success { border-left: 4px solid var(--accent2); }
+        .toast.warn { border-left: 4px solid var(--warn); }
+        .toast.error { border-left: 4px solid var(--danger); }
+
+        @keyframes toastSlideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Lightbox Modal */
+        .lightbox-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lightbox-content {
+            max-width: 95vw;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            border: 2px solid var(--accent);
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            font-size: 2rem;
+            color: #ffffff;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+        }
+
+        .lightbox-caption {
+            position: absolute;
+            bottom: 20px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            font-weight: 700;
+            background: rgba(0,0,0,0.75);
+            padding: 6px 16px;
+            border-radius: 20px;
+        }
+
+        .btn-back-to-top {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            z-index: 99;
+            transition: all 0.2s ease;
+            opacity: 0.85;
+        }
+
+        .btn-back-to-top:hover {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .btn-play-today-compact {
+            background: var(--accent2);
+            color: #04240f;
+            font-weight: 700;
+            font-size: 0.78rem;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-play-today-compact:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Barra Superior de Atalhos Hands-Free -->
+    <div class="hands-free-bar">
+        ⌨️ <b>Atalhos Hands-Free:</b>
+        <kbd id="keySpace">Espaço</kbd> (Acerto/Timer) |
+        <kbd id="keyE">E</kbd> (Erro) |
+        <kbd id="keyM">M</kbd> (Metrônomo) |
+        <kbd id="keyH">H</kbd> (Memória Ativa) |
+        <kbd id="keyP">P</kbd> (Pausar) |
+        <kbd id="keyN">N</kbd> (Próximo)
+    </div>
+
+    <header>
+        <h1>🎹 Cockpit de Estudos — Piano</h1>
+        <p>HMI de Alta Ergonomia, Metrônomo WebAudio & Neurodidática (Versão 15.1.0)</p>
+    </header>
+
+    <!-- Barra de Navegação de Abas (6 Abas Principais Enxutas) -->
+    <nav class="tabs">
+        <button class="tab-btn active" data-action="switch-tab" data-tab="hoje">🏠 Hoje</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="sala">Sala de Estudos</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="pecas">Peças</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="tecnica">Técnica</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="progresso">Progresso</button>
+        <button class="tab-btn" data-action="switch-tab" data-tab="config">Config & Nuvem</button>
+    </nav>
+
+    <main class="container">
+
+        <!-- ABA: HOJE (CENTRAL EXECUTIVA DO TREINADOR) -->
+        <section id="section-hoje" class="section active">
+            <!-- 2. Projeção Semanal Adaptativa de 7 Dias -->
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <div id="predictiveCalendarContainer"></div>
+                <div id="weeklyGoalsContainer" style="margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border);"></div>
+            </div>
+
+            <!-- 3. Briefing do Treinador Cognitivo -->
+            <div class="card" style="border-left: 4px solid var(--warn);">
+                <div id="morningBriefingContainer"></div>
+            </div>
+
+            <!-- 4. Auditoria Avulsa de 1º Tiro -->
+            <div class="card" id="coldAuditInlineCard" style="border-left: 4px solid var(--warn);">
+                <div id="coldAuditInlineContainer"></div>
+            </div>
+
+            <!-- 5. Resumo do Estudo de Hoje -->
+            <div class="card">
+                <h2>📊 Resumo do Estudo de Hoje</h2>
+                <div class="stat-grid">
+                    <div class="stat-box">
+                        <div id="statTotalMinutes" class="num">0</div>
+                        <div class="lbl">MINUTOS HOJE</div>
+                    </div>
+                    <div class="stat-box">
+                        <div id="statSessions" class="num">0</div>
+                        <div class="lbl" id="statSessionsLabel">SESSÕES HOJE</div>
+                    </div>
+                    <div class="stat-box">
+                        <div id="statAudits" class="num">0</div>
+                        <div class="lbl">AUDITORIAS HOJE</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA: SALA DE ESTUDOS (5 SUB-MODOS: GUIADA, SANDUÍCHE, SORTEIO, LEITURA E LIVRE) -->
+        <section id="section-sala" class="section">
+            <div class="subtabs-container">
+                <button class="subtab-btn active" id="btnSubtabGuided" data-action="switch-sala-mode" data-mode="guided">🎯 Sessão Guiada</button>
+                <button class="subtab-btn" id="btnSubtabSandwich" data-action="switch-sala-mode" data-mode="sandwich">🥪 Sanduíche</button>
+                <button class="subtab-btn" id="btnSubtabRandom" data-action="switch-sala-mode" data-mode="random">🎲 Sorteio</button>
+                <button class="subtab-btn" id="btnSubtabReading" data-action="switch-sala-mode" data-mode="reading">📖 Leitura</button>
+                <button class="subtab-btn" id="btnSubtabFree" data-action="switch-sala-mode" data-mode="free">🎹 Prática Livre</button>
+            </div>
+
+            <div id="viewGuidedMode">
+                <div class="card" style="border-left: 4px solid var(--accent2);">
+                    <div id="guidedSessionContainer"></div>
+                </div>
+            </div>
+
+            <div id="viewSandwichMode" style="display: none;">
+                <div class="card" style="border-left: 4px solid var(--purple);">
+                    <div id="sandwichContainer"></div>
+                </div>
+            </div>
+
+            <div id="viewRandomMode" style="display: none;">
+                <div class="card" style="border-left: 4px solid var(--warn);">
+                    <div id="randomContainer"></div>
+                </div>
+            </div>
+
+            <div id="viewReadingMode" style="display: none;">
+                <div class="card" style="border-left: 4px solid var(--accent2);">
+                    <div id="readingContainer"></div>
+                </div>
+            </div>
+
+            <div id="viewFreeMode" style="display: none;">
+                <div class="card" style="border-left: 4px solid var(--accent);">
+                    <div id="freePracticeContainer"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA: PEÇAS (REPERTÓRIO) -->
+        <section id="section-pecas" class="section">
+            <div class="card" style="background: var(--card2); border-left: 4px solid var(--accent); margin-bottom: 14px;">
+                <h2 style="margin: 0 0 4px; font-size: 1.05rem; color: #fff;">📚 Método Oficial: Escola Russa Vol. 2</h2>
+                <p style="margin: 0; font-size: 0.8rem; color: var(--text-muted); line-height: 1.45;">
+                    Mapeamento de Passos e Nomenclatura Padronizada <b>XX.Y.ZZ-WW</b> (Matriz Enxuta de 35 Trechos).
+                </p>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 14px 0 10px;">
+    			<div style="display: flex; align-items: center; gap: 8px;">
+       			 <h2 style="font-size: 1.05rem; color: var(--accent); margin: 0;">🔥 Peças em Estudo Ativo</h2>
+        			 <span class="badge info" id="activePiecesBadge">2 Ativas</span>
+    			</div>
+		</div>
+
+            <div id="activePiecesContainer"></div>
+
+            <div class="card" style="border-left: 4px solid var(--warn); margin-top: 14px;">
+                <h2>🎯 Radar Anti-Da Capo (Esforço por Seção) <span class="badge warn">Prevenção</span></h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px;">
+                    Verifique se o seu estudo está distribuído igualmente por toda a peça, evitando o vício de tocar só o início.
+                </p>
+                <div id="antiDaCapoRadarContainer"></div>
+            </div>
+
+            <div class="card" style="background: var(--card-inner); border: 1px solid var(--border); padding: 12px 14px; margin-top: 16px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" data-action="toggle-paused-drawer">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 1.1rem;">⏸️</span>
+                        <h3 style="margin: 0; font-size: 0.95rem; color: #cbd5e1;">Peças Pausadas / Em Espera</h3>
+                        <span class="badge" style="background: #475569; color: #f8fafc;" id="pausedPiecesBadge">2 Pausadas</span>
+                    </div>
+                    <button class="btn btn-outline" style="font-size: 0.72rem; padding: 4px 8px;" id="btnTogglePaused">Mostrar</button>
+                </div>
+                <div id="pausedPiecesContainer" style="display: none; margin-top: 12px;"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0 10px;">
+                <h2 style="font-size: 1rem; color: var(--accent2); margin: 0;">🎼 Fila de Graduação (Roadmap)</h2>
+                <button class="btn btn-outline" id="btnToggleFila" style="font-size: 0.72rem; padding: 5px 8px;" data-action="toggle-fila">📁 Recolher Fila</button>
+            </div>
+
+            <div id="queuePiecesContainer"></div>
+        </section>
+
+        <!-- ABA: TÉCNICA (COM CRUD DINÂMICO & LABORATÓRIO DE CALIBRAÇÃO) -->
+        <section id="section-tecnica" class="section">
+            <div class="card" style="border-left: 4px solid var(--purple);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <h2 style="margin: 0; font-size: 1.1rem; color: #fff;">🔬 Laboratório de Calibração Técnica (Microciclos)</h2>
+                        <span class="badge purple">Foco Profundo</span>
+                    </div>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Isole passagens críticas com microciclos estruturados de 3 a 5 dias para inibição consciente de vícios motores.
+                </p>
+                <div id="utiContainer"></div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <h2>⚙️ Pilar Técnico (Fundamentos) <span class="badge info">Fundamentos</span></h2>
+                <p style="margin-bottom: 12px;">Prática estruturada de Escalas no Padrão Russo, Arpejos e Cadências nos 12 tons.</p>
+                <div id="technicalContainer"></div>
+            </div>
+        </section>
+
+        <!-- ABA: PROGRESSO (COM RELATÓRIO PARA A PROFESSORA E MAESTRIA) -->
+        <section id="section-progresso" class="section">
+            <div class="card" style="border-left: 4px solid var(--warn);">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="margin: 0; font-size: 1.05rem; color: #fff;">🏆 Nível de Consistência & Gamificação</h2>
+                    <span id="playerLevelBadge" class="badge warn">Nível 1 — Iniciante Consciente</span>
+                </div>
+                <div class="xp-level-bar">
+                    <div id="playerXpFill" class="xp-level-fill" style="width: 0%;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-muted);">
+                    <span id="playerXpLabel">0 XP acumulados</span>
+                    <span>🛡️ Escudo de Descanso Ativo (Day-Off Protegido)</span>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h2 style="margin: 0; font-size: 1.05rem; color: #fff;">📊 Relatório Semanal de Prática</h2>
+                    <span class="badge" style="background: rgba(34, 197, 94, 0.2); color: var(--accent2);">Para Professora</span>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px;">
+                    Gere um resumo estruturado da sua semana para autoavaliação ou para compartilhar diretamente pelo WhatsApp com sua professora.
+                </p>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-start" style="flex: 1; min-width: 140px; padding: 10px; font-weight: 700;" data-action="generate-weekly-report">📊 Gerar Resumo</button>
+                    <button class="btn btn-primary" style="flex: 1; min-width: 160px; padding: 10px; font-weight: 700; width: auto; margin-top: 0;" data-action="share-weekly-report">📱 Compartilhar (WhatsApp)</button>
+                    <button class="btn btn-outline" style="padding: 10px 14px; font-weight: 700;" data-action="copy-weekly-report">📋 Copiar</button>
+                </div>
+                <div id="weeklyReportPreviewContainer" style="margin-top: 12px; display: none;"></div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <h2>🏔️ Pirâmide de Mielinização (Caixas Leitner) <span class="badge info">Maturidade</span></h2>
+                <p style="margin-bottom: 10px;">Distribuição da massa de repertório pelas caixas de retenção pós-sono.</p>
+                <div id="pyramidContainer"></div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--purple);">
+                <h2>🎯 Círculo de Quintas (Radar das 12 Tonalidades) <span class="badge purple">Técnica</span></h2>
+                <p style="margin-bottom: 10px;">Cobertura harmônica de Escalas, Arpejos e Cadências.</p>
+                <div id="circleOfFifthsContainer" style="display: flex; justify-content: center;"></div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent2);">
+                <h2>📅 Calendário de Consistência (4 Semanas) <span class="badge accent2">Consistência</span></h2>
+                <p style="margin-bottom: 6px;">Histórico visual dos dias de prática estilo GitHub (toque para detalhes):</p>
+                <div id="heatmapContainer"></div>
+            </div>
+
+            <div id="timeBreakdownContainer"></div>
+        </section>
+
+        <!-- ABA: CONFIG & NUVEM (HUB UNIFICADO DE DADOS) -->
+        <section id="section-config" class="section">
+            <div class="card" style="border-left: 4px solid var(--accent);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h2 style="margin: 0; font-size: 1.05rem; color: #fff;">☁️ Sincronização em Nuvem (1-Clique)</h2>
+                    <span class="badge info">Google Drive</span>
+                </div>
+                <p style="margin-bottom: 12px;">Backup bidirecional assíncrono conectado ao seu Google Apps Script.</p>
+                <div class="form-group">
+                    <label>URL do Web App (Google Apps Script):</label>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="cloudUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+                        <button class="btn btn-primary" style="width: auto; margin-top: 0; padding: 8px 14px;" data-action="save-cloud-url">Salvar URL</button>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 8px; margin-top: 10px;">
+                    <button class="btn btn-primary" style="flex: 1; padding: 12px; margin-top: 0; font-weight: 700;" data-action="cloud-push">☁️ Enviar p/ Nuvem (Backup)</button>
+                    <button class="btn btn-outline" style="flex: 1; padding: 12px; border-color: var(--accent); color: #93c5fd;" data-action="cloud-pull">📥 Puxar da Nuvem (Restaurar)</button>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--purple);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h2 style="margin: 0; font-size: 1.05rem; color: #fff;">💾 Backup Local & Importação (JSON)</h2>
+                    <span class="badge purple">Segurança SSOT</span>
+                </div>
+                <p style="margin-bottom: 12px;">Exporte seu savegame completo ou restaure um arquivo JSON anterior com validação segura.</p>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <button class="btn btn-primary" style="flex: 1; margin-top: 0; padding: 11px;" data-action="export-savegame">📋 Copiar Savegame JSON</button>
+                    <button class="btn btn-outline" style="flex: 1; padding: 11px; border-color: var(--accent2); color: var(--accent2);" data-action="import-savegame-prompt">📥 Importar Backup JSON</button>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 10px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.76rem; color: var(--text-muted);">Reset completo dos dados de fábrica:</span>
+                    <button class="btn btn-reset" style="font-size: 0.72rem; padding: 6px 12px; color: var(--danger); background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger);" data-action="reset-defaults-safe">⚠️ Resetar Dados (Fábrica)</button>
+                </div>
+            </div>
+
+            <div class="card" style="border-left: 4px solid var(--accent2);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <h2 style="margin: 0; font-size: 1.05rem; color: #fff;">📝 Registro de Prática Acústica / Offline</h2>
+                    <span class="badge accent2">+XP Diário</span>
+                </div>
+                <p style="margin-bottom: 12px;">Lance estudos realizados no piano acústico com rateio relacional de minutos.</p>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Pilar de Estudo:</label>
+                        <select id="offlinePilarSelect" class="form-control" data-action="change-offline-pilar">
+                            <option value="repertoire">🎵 Repertório</option>
+                            <option value="technical">⚙️ Técnica</option>
+                            <option value="reading">📖 Leitura</option>
+                            <option value="free">🎹 Prática Livre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Item / Peça Específica:</label>
+                        <select id="offlineItemSelect" class="form-control"></select>
+                    </div>
+                </div>
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label>Duração (minutos):</label>
+                        <input type="number" id="offlineMinutesInput" class="form-control" placeholder="Ex: 30" min="1" value="20">
+                    </div>
+                    <div class="form-group">
+                        <label>BPM Atingido (opcional):</label>
+                        <input type="number" id="offlineBpmInput" class="form-control" placeholder="Ex: 60">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Anotações da Sessão:</label>
+                    <input type="text" id="offlineNotesInput" class="form-control" placeholder="Ex: Foco no relaxamento do pulso">
+                </div>
+                <button class="btn btn-start" style="width: 100%; padding: 12px; font-weight: 700;" data-action="save-offline-practice">💾 Gravar Prática Acústica (+XP)</button>
+            </div>
+
+            <div class="card" id="historyTableContainer">
+			<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+			<div style="display: flex; align-items: center; gap: 8px;">
+				<h2 style="margin: 0; font-size: 1.05rem; color: #fff;">📜 Histórico Unificado de Sessões</h2>
+				<span class="badge info" style="font-size: 0.68rem;">SSOT Ativo</span>
+		</div>
+			<button class="btn btn-primary" data-action="generate-teacher-report" style="width: auto; margin-top: 0; padding: 6px 12px; font-size: 0.75rem; font-weight: 700;">
+			📋 Relatório da Professora
+			</button>
+		</div>
+		<div style="overflow-x: auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Tipo</th>
+                                <th>Item / Trecho</th>
+                                <th>Tempo</th>
+                                <th>Precisão</th>
+                                <th style="width: 50px;">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+                <button id="historyLoadMoreBtn" class="btn btn-outline" style="width: 100%; margin-top: 10px; font-size: 0.78rem; display: none;" data-action="load-more-history">📂 Carregar Mais Registros</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Container de Toast Notifications -->
+    <div id="toastContainer"></div>
+
+    <!-- Modal Lightbox para Zoom de Partitura em Tela Cheia -->
+    <div id="lightboxModal" class="lightbox-modal" data-action="close-lightbox-overlay">
+        <button class="lightbox-close" data-action="close-lightbox">×</button>
+        <img id="lightboxImg" class="lightbox-content sheet-paper-effect" src="" alt="Partitura Ampliada">
+        <div id="lightboxCaption" class="lightbox-caption">Partitura em Alta Resolução</div>
+    </div>
+
+    <!-- Botão Flutuante Voltar ao Topo -->
+    <button class="btn-back-to-top" data-action="scroll-to-top" title="Voltar ao Topo">🔼</button>
+
+    <!-- Carregamento dos Scripts Modulares (Ordem Canônica Versão 15.1.0) -->
+    <script src="state.js"></script>
+    <!-- NOVO: Adicionado aqui para alimentar os players síncronamente -->
+    <script src="pianoDatabase.js"></script>
+    <script src="audioTools.js"></script>
+    <script src="repertoire.js"></script>
+    <script src="neuroEngine.js"></script>
+    <script src="technical.js"></script>
+    <script src="reading.js"></script>
+    <script src="charts.js"></script>
+    <script src="cloudSync.js"></script>
+    <script src="sessionPlayer.js"></script>
+    <script src="sandwichPlayer.js"></script>
+    <script src="randomPlayer.js"></script>
+    <script src="freePlayer.js"></script>
+    <script src="setupGlobalEventListeners.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
